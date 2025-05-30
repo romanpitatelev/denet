@@ -1,0 +1,21 @@
+services:
+  postgres:
+    container_name: postgres_denet
+    image: postgres:17.2
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: my_pass
+      POSTGRES_DB: denet_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d denet_db"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+  
+volumes:
+  postgres-data:
+    driver: local
