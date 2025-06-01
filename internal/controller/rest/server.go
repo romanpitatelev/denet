@@ -35,10 +35,10 @@ type usersHandler interface {
 	UpdateUser(w http.ResponseWriter, r *http.Request)
 	DeleteUser(w http.ResponseWriter, r *http.Request)
 	GetUsers(w http.ResponseWriter, r *http.Request)
+	GetTopUsers(w http.ResponseWriter, r *http.Request)
 }
 
 type taskHandler interface {
-	GetTopUsers(w http.ResponseWriter, r *http.Request)
 	Task(w http.ResponseWriter, r *http.Request)
 	ReferralTask(w http.ResponseWriter, r *http.Request)
 }
@@ -71,7 +71,7 @@ func New(
 			r.Patch("/users/{id}", s.usersHandler.UpdateUser)
 			r.Delete("/users/{id}", s.usersHandler.DeleteUser)
 			r.Get("/users", s.usersHandler.GetUsers)
-			r.Get("/users/leaderboard", s.taskHandler.GetTopUsers)
+			r.Get("/users/leaderboard", s.usersHandler.GetTopUsers)
 			r.Post("/users/{id}/task/complete", s.taskHandler.Task)
 			r.Post("/users/{id}/referrer", s.taskHandler.ReferralTask)
 		})

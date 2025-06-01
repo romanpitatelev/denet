@@ -12,6 +12,7 @@ type usersStore interface {
 	UpdateUser(ctx context.Context, userID entity.UserID, updatedUser entity.UserUpdate) (entity.User, error)
 	DeleteUser(ctx context.Context, userID entity.UserID) error
 	GetUsers(ctx context.Context, request entity.ListRequest) ([]entity.User, error)
+	GetTopUsers(ctx context.Context) ([]entity.User, error)
 }
 
 type Service struct {
@@ -64,6 +65,15 @@ func (s *Service) GetUsers(ctx context.Context, request entity.ListRequest) ([]e
 	users, err := s.usersStore.GetUsers(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("GetUsers %w", err)
+	}
+
+	return users, nil
+}
+
+func (s *Service) GetTopUsers(ctx context.Context) ([]entity.User, error) {
+	users, err := s.usersStore.GetTopUsers(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("GetTopUsers %w", err)
 	}
 
 	return users, nil

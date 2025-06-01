@@ -11,6 +11,7 @@ import (
 
 type (
 	UserID uuid.UUID
+	TaskID uuid.UUID
 )
 
 type User struct {
@@ -65,4 +66,34 @@ type ListRequest struct {
 	Limit      int
 	Filter     string
 	Offset     int
+}
+
+type Task struct {
+	ID     TaskID `json:"id"`
+	Type   string `json:"type"`
+	Points int    `json:"points"`
+}
+
+type TaskResponse struct {
+	Task
+	CreatedAt    time.Time `json:"createdAt"`
+	TotatlPoints int       `json:"total_points"`
+}
+
+func (t *Task) Validate() (Task, error) {
+	if t.Points != 0 {
+		return Task{}, ErrInvalidTaskPoints
+	}
+
+	if t.Type == "telegram" {
+		t.Points = 1
+		return *t, nil
+	}
+
+	if t.Type == "twitter" {
+		t.Points = 2
+		return *t, nil
+	}
+
+	return Task{}, ErrInvalidTaskType
 }

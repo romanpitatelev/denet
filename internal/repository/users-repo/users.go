@@ -180,3 +180,29 @@ func (r *Repo) GetUsers(ctx context.Context, request entity.ListRequest) ([]enti
 
 	return result, nil
 }
+
+const defaultTopLimit = 20
+
+func (r *Repo) GetTopUsers(ctx context.Context) ([]entity.User, error) {
+	db := r.db.GetTXFromContext(ctx)
+
+	query := `
+SELECT id, name, email, role, points, created_at, updated_at
+FROM users
+WHERE deleted_at IS NULL
+ORDER BY points DESC
+`
+
+	sb := strings.Builder{}
+	sb.WriteString(query)
+
+	sb.WriteString(" LIMIT " + strconv.Itoa(defaultTopLimit))
+
+	var result []entity.User
+
+	if err := pgxscan.Select(ctx, db, &result, sb.String()); err != nil {
+		return nil, fmt.Errorf("error listing users: %w", err)
+	}
+
+	return result, nil
+}

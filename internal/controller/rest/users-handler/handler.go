@@ -16,6 +16,7 @@ type usersService interface {
 	UpdateUser(ctx context.Context, userID entity.UserID, updatedUser entity.UserUpdate) (entity.User, error)
 	DeleteUser(ctx context.Context, userID entity.UserID) error
 	GetUsers(ctx context.Context, request entity.ListRequest) ([]entity.User, error)
+	GetTopUsers(ctx context.Context) ([]entity.User, error)
 }
 
 type Handler struct {
@@ -101,6 +102,17 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.usersService.GetUsers(r.Context(), request)
 	if err != nil {
 		common.ErrorResponse(w, "error listing users", err)
+
+		return
+	}
+
+	common.OkResponse(w, http.StatusOK, users)
+}
+
+func (h *Handler) GetTopUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.usersService.GetTopUsers(r.Context())
+	if err != nil {
+		common.ErrorResponse(w, "error listing top users", err)
 
 		return
 	}
