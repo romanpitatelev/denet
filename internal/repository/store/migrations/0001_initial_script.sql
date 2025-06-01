@@ -22,5 +22,13 @@ CREATE TABLE tasks
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 }
 
+CREATE TABLE reference
+(
+    id uuid PRIMARY KEY,
+    user_id REFERENCES users (id) NOT NULL,
+    reference_id REFERENCES users (id) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+
 -- +migrate Down
 DROP INDEX IF EXISTS idx_user_id;

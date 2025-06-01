@@ -8,9 +8,12 @@ import (
 
 	"github.com/romanpitatelev/denet/internal/configs"
 	"github.com/romanpitatelev/denet/internal/controller/rest"
+	taskshandler "github.com/romanpitatelev/denet/internal/controller/rest/tasks-handler"
 	usershandler "github.com/romanpitatelev/denet/internal/controller/rest/users-handler"
 	"github.com/romanpitatelev/denet/internal/repository/store"
+	tasksrepo "github.com/romanpitatelev/denet/internal/repository/tasks-repo"
 	usersrepo "github.com/romanpitatelev/denet/internal/repository/users-repo"
+	tasksservice "github.com/romanpitatelev/denet/internal/usecase/task-service"
 	usersservice "github.com/romanpitatelev/denet/internal/usecase/users-service"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -40,13 +43,18 @@ func Run(cfg *configs.Config) error {
 	log.Info().Msg("successful migration")
 
 	usersRepo := usersrepo.New(db)
+	tasksRepo := tasksrepo.New(db)
+
 	usersService := usersservice.New(usersRepo)
+	tasksService := tasksservice.New(tasksRepo)
 
 	usersHandler := usershandler.New(usersService)
+	tasksHandler := taskshandler.New(tasksService)
 
 	server := rest.New(
 		rest.Config{BindAddress: cfg.BindAddress},
 		usersHandler,
+		tasksHandler,
 		rest.GetPublicKey(),
 	)
 

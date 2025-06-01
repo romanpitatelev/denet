@@ -46,7 +46,7 @@ type taskHandler interface {
 func New(
 	cfg Config,
 	usersHandler usersHandler,
-	// taskHandler taskHandler,
+	taskHandler taskHandler,
 	key *rsa.PublicKey,
 ) *Server {
 	router := chi.NewRouter()
@@ -58,8 +58,8 @@ func New(
 			ReadHeaderTimeout: readHeaderTimeoutValue,
 		},
 		usersHandler: usersHandler,
-		// taskHandler:  taskHandler,
-		key: key,
+		taskHandler:  taskHandler,
+		key:          key,
 	}
 
 	router.Route("/api", func(r chi.Router) {

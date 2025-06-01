@@ -10,8 +10,9 @@ import (
 )
 
 type (
-	UserID uuid.UUID
-	TaskID uuid.UUID
+	UserID      uuid.UUID
+	TaskID      uuid.UUID
+	ReferenceID uuid.UUID
 )
 
 type User struct {
@@ -77,7 +78,7 @@ type Task struct {
 type TaskResponse struct {
 	Task
 	CreatedAt    time.Time `json:"createdAt"`
-	TotatlPoints int       `json:"total_points"`
+	TotatlPoints int       `json:"totalPoints"`
 }
 
 func (t *Task) Validate() (Task, error) {
@@ -86,14 +87,29 @@ func (t *Task) Validate() (Task, error) {
 	}
 
 	if t.Type == "telegram" {
-		t.Points = 1
+		t.Points = 3
+
 		return *t, nil
 	}
 
 	if t.Type == "twitter" {
 		t.Points = 2
+
 		return *t, nil
 	}
 
 	return Task{}, ErrInvalidTaskType
+}
+
+type Reference struct {
+	ID              ReferenceID `json:"referenceId"`
+	UserID          UserID      `json:"userId"`
+	UserReferenceID UserID      `json:"userReferenceId"`
+	Points          int         `json:"points"`
+}
+
+type ReferenceResponse struct {
+	Reference
+	CreatedAt    time.Time `json:"createdAt"`
+	TotatlPoints int       `json:"totalPoints"`
 }

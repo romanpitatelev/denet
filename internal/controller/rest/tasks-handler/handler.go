@@ -1,4 +1,4 @@
-package taskhandler
+package taskshandler
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 
 type taskService interface {
 	Task(ctx context.Context, userID entity.UserID, task entity.Task) (entity.TaskResponse, error)
-	ReferralTask()
+	ReferralTask(ctx context.Context, reference entity.Reference) (entity.ReferenceResponse, error)
 }
 
 type Handler struct {
@@ -52,4 +52,34 @@ func (h *Handler) Task(w http.ResponseWriter, r *http.Request) {
 	}
 
 	common.OkResponse(w, http.StatusOK, taskResponse)
+}
+
+func (h *Handler) ReferralTask(w http.ResponseWriter, r *http.Request) {
+	userID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+
+		return
+	}
+
+	ctx := r.Context()
+
+	var reference entity.Reference
+
+	if err = json.NewDecoder(r.Body).Decode(&reference); err != nil {
+		http.Error(w, "error decoding request body", http.StatusBadRequest)
+
+		return
+	}
+
+	reference.UserID = entity.UserID(userID)
+
+	referenceResponse, err := h.taskService.ReferralTask(ctx, reference)
+	if err != nil {
+		common.ErrorResponse(w, "error updating user", err)
+
+		return
+	}
+
+	common.OkResponse(w, http.StatusOK, referenceResponse)
 }

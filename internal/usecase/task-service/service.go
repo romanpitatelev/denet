@@ -1,4 +1,4 @@
-package taskservice
+package tasksservice
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 type tasksStore interface {
 	Task(ctx context.Context, userID entity.UserID, task entity.Task) (entity.TaskResponse, error)
-	ReferralTask()
+	ReferralTask(ctx context.Context, reference entity.Reference) (entity.ReferenceResponse, error)
 }
 
 type Service struct {
@@ -37,4 +37,15 @@ func (s *Service) Task(ctx context.Context, userID entity.UserID, task entity.Ta
 	}
 
 	return taskResponse, nil
+}
+
+func (s *Service) ReferralTask(ctx context.Context, reference entity.Reference) (entity.ReferenceResponse, error) {
+	reference.ID = entity.ReferenceID(uuid.New())
+
+	referenceResponse, err := s.tasksStore.ReferralTask(ctx, reference)
+	if err != nil {
+		return entity.ReferenceResponse{}, fmt.Errorf("failed to complete reference task: %w", err)
+	}
+
+	return referenceResponse, nil
 }
