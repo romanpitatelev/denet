@@ -48,6 +48,13 @@ func getStatusCode(err error) int {
 		return http.StatusNotFound
 	case errors.Is(err, entity.ErrInvalidToken):
 		return http.StatusUnauthorized
+	case errors.Is(err, entity.ErrDuplicateContact):
+		return http.StatusConflict
+	case errors.Is(err, entity.ErrInvalidTaskType) ||
+		errors.Is(err, entity.ErrInvalidTaskPoints) ||
+		errors.Is(err, entity.ErrEmptyReferenceUser) ||
+		errors.Is(err, entity.ErrSelfReference):
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

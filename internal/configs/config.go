@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	envFileName = ".env"
+	envFileName = "example.env"
 )
 
 type Config struct {

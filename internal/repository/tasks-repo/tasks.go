@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/romanpitatelev/denet/internal/entity"
 	"github.com/romanpitatelev/denet/internal/repository/store"
 )
-
-const referencePoint = 1
 
 type Repo struct {
 	db *store.DataStore
@@ -89,6 +89,11 @@ func (r *Repo) Task(ctx context.Context, userID entity.UserID, task entity.Task)
 
 		return nil
 	}); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.ForeignKeyViolation {
+			return entity.TaskResponse{}, entity.ErrUserNotFound
+		}
+
 		return entity.TaskResponse{}, fmt.Errorf("failed to complete task transaction: %w", err)
 	}
 
@@ -112,7 +117,7 @@ func (r *Repo) ReferralTask(ctx context.Context, reference entity.Reference) (en
 		}
 
 		row := tx.QueryRow(ctx, updateUserPointsQuery,
-			referencePoint,
+			reference.Points,
 			transactionTime,
 			reference.UserID,
 		)
@@ -135,7 +140,7 @@ func (r *Repo) ReferralTask(ctx context.Context, reference entity.Reference) (en
 				ID:              reference.ID,
 				UserID:          reference.UserID,
 				UserReferenceID: reference.UserReferenceID,
-				Points:          referencePoint,
+				Points:          reference.Points,
 			},
 			CreatedAt:    transactionTime,
 			TotatlPoints: totalPoints,
@@ -143,6 +148,11 @@ func (r *Repo) ReferralTask(ctx context.Context, reference entity.Reference) (en
 
 		return nil
 	}); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.ForeignKeyViolation {
+			return entity.ReferenceResponse{}, entity.ErrUserNotFound
+		}
+
 		return entity.ReferenceResponse{}, fmt.Errorf("failed to complete reference transaction: %w", err)
 	}
 
