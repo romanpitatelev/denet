@@ -1,12 +1,13 @@
 package entity
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/mail"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type (
@@ -112,4 +113,59 @@ type ReferenceResponse struct {
 	Reference
 	CreatedAt    time.Time `json:"createdAt"`
 	TotatlPoints int       `json:"totalPoints"`
+}
+
+func (r *Reference) Validate() error {
+	if r.UserID == r.UserReferenceID {
+		return ErrSelfReference
+	}
+
+	if r.UserReferenceID == UserID(uuid.Nil) {
+		return ErrEmptyReferenceUser
+	}
+
+	return nil
+}
+
+func unmarshalUUID(id *uuid.UUID, data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("unmarshalling error: %w", err)
+	}
+
+	parsed, err := uuid.Parse(s)
+	if err != nil {
+		return ErrInvalidUUIDFormat
+	}
+
+	*id = parsed
+
+	return nil
+}
+
+func (u *UserID) UnmarshalText(data []byte) error {
+	return unmarshalUUID((*uuid.UUID)(u), data)
+}
+
+func (u *TaskID) UnmarshalText(data []byte) error {
+	return unmarshalUUID((*uuid.UUID)(u), data)
+}
+
+func (u *ReferenceID) UnmarshalText(data []byte) error {
+	return unmarshalUUID((*uuid.UUID)(u), data)
+}
+
+//nolint:wrapcheck
+func (u UserID) MarshalText() ([]byte, error) {
+	return json.Marshal(uuid.UUID(u).String())
+}
+
+//nolint:wrapcheck
+func (u TaskID) MarshalText() ([]byte, error) {
+	return json.Marshal(uuid.UUID(u).String())
+}
+
+//nolint:wrapcheck
+func (u ReferenceID) MarshalText() ([]byte, error) {
+	return json.Marshal(uuid.UUID(u).String())
 }

@@ -17,11 +17,11 @@ lint: tidy
 	gci write . --skip-generated -s standard -s default 	
 	golangci-lint run ./...
 
-# test: up
-# 	go test -race ./... -v -coverpkg=./... -coverprofile=coverage.txt -covermode atomic
-# 	go tool cover -func=coverage.txt | grep 'total'
-# 	which gocover-cobertura || go install github.com/t-yuki/gocover-cobertura@latest
-# 	gocover-cobertura < coverage.txt > coverage.xml
+test: up
+	go test -race ./... -v -coverpkg=./... -coverprofile=coverage.txt -covermode atomic
+	go tool cover -func=coverage.txt | grep 'total'
+	which gocover-cobertura || go install github.com/t-yuki/gocover-cobertura@latest
+	gocover-cobertura < coverage.txt > coverage.xml
 
 image:
 	docker build -f deployment/local/Dockerfile .

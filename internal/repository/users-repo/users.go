@@ -10,7 +10,9 @@ import (
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/romanpitatelev/denet/internal/entity"
 	"github.com/romanpitatelev/denet/internal/repository/store"
 )
@@ -89,6 +91,7 @@ func (r *Repo) UpdateUser(ctx context.Context, userID entity.UserID, updatedUser
 	sb.WriteString(strings.Join(updates, ", "))
 
 	params = append(params, userID)
+	sb.WriteString(fmt.Sprintf(" WHERE id = $%d AND deleted_at IS NULL", len(params)))
 
 	sb.WriteString(" RETURNING id, name, email, role, points, created_at, updated_at")
 
@@ -98,6 +101,14 @@ func (r *Repo) UpdateUser(ctx context.Context, userID entity.UserID, updatedUser
 		if errors.Is(err, pgx.ErrNoRows) {
 			return entity.User{}, entity.ErrUserNotFound
 		}
+
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return entity.User{}, entity.ErrDuplicateContact
+		}
+
+		return entity.User{}, fmt.Errorf("failed to get user info: %w", err)
 	}
 
 	return user, nil

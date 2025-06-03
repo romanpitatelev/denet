@@ -57,6 +57,7 @@ func (s *Server) jwtAuth(next http.Handler) http.Handler {
 			return s.key, nil
 		})
 		if err != nil {
+			log.Debug().Err(err).Msg("JWT validation failed")
 			s.errorUnauthorizedResponse(w, entity.ErrInvalidToken)
 
 			return
